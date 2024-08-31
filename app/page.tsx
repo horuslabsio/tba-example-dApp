@@ -24,10 +24,10 @@ export default function page() {
         modalTheme: "dark",
         webWalletUrl: "https://web.argent.xyz",
         dappName: "test app",
-        connectors: [
-          new WebWalletConnector(),
-          new TokenboundConnector({chainId: constants.NetworkName.SN_SEPOLIA})
-        ],
+        // connectors: [
+        //   new WebWalletConnector(),
+        //   new TokenboundConnector({chainId: constants.NetworkName.SN_SEPOLIA})
+        // ],
         argentMobileOptions: {
           dappName: "Tokenbound Account Connector",
           url: window.location.hostname,
@@ -39,7 +39,6 @@ export default function page() {
         }
       });
 
-      setWallet(wallet)
       console.log(wallet, "connected wallet")
 
     } catch (e) {
