@@ -12,22 +12,23 @@ export default function page() {
   const [connection, setConnection] = useState<
     TBAStarknetWindowObject | null | undefined
   >(null);
+
   const [account, setAccount] = useState();
   const [address, setAddress] = useState("");
   const [retrievedValue, setRetrievedValue] = useState("");
 
-  const contractAddress =
-    "0x077e0925380d1529772ee99caefa8cd7a7017a823ec3db7c003e56ad2e85e300";
+  const contractAddress = "0x077e0925380d1529772ee99caefa8cd7a7017a823ec3db7c003e56ad2e85e300";
 
   const connectFn = async () => {
     try {
       const { wallet } = await connect({
         tokenboundOptions: {
-          chainId: constants.NetworkName.SN_SEPOLIA,
+          chainId: constants.NetworkName.SN_MAIN,
         },
       });
       setConnection(wallet);
       setAccount(wallet?.account);
+      setAddress(wallet?.selectedAddress)
     } catch (e) {
       console.error(e);
       alert((e as any).message);
@@ -36,6 +37,8 @@ export default function page() {
 
   const disconnectFn = async () => {
     await disconnect();
+    setAddress("")
+    setAccount(undefined)
     setConnection(null);
   };
 
