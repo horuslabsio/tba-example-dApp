@@ -1,47 +1,42 @@
-export const ABI = [
+export const CounterABi = [
   {
-    "name": "core::integer::u256",
-    "type": "struct",
-    "members": [
+    "name": "ICounterImpl",
+    "type": "impl",
+    "interface_name": "cairo_bootcamp_3::counter::ICounter"
+  },
+  {
+    "name": "cairo_bootcamp_3::counter::ICounter",
+    "type": "interface",
+    "items": [
       {
-        "name": "low",
-        "type": "core::integer::u128"
+        "name": "get_count",
+        "type": "function",
+        "inputs": [],
+        "outputs": [
+          {
+            "type": "core::integer::u32"
+          }
+        ],
+        "state_mutability": "view"
       },
       {
-        "name": "high",
-        "type": "core::integer::u128"
+        "name": "set_count",
+        "type": "function",
+        "inputs": [
+          {
+            "name": "amount",
+            "type": "core::integer::u32"
+          }
+        ],
+        "outputs": [],
+        "state_mutability": "external"
       }
     ]
   },
   {
-    "name": "get_current_count",
-    "type": "function",
-    "inputs": [],
-    "outputs": [
-      {
-        "type": "core::integer::u256"
-      }
-    ],
-    "state_mutability": "view"
-  },
-  {
-    "name": "increment",
-    "type": "function",
-    "inputs": [],
-    "outputs": [],
-    "state_mutability": "external"
-  },
-  {
-    "name": "decrement",
-    "type": "function",
-    "inputs": [],
-    "outputs": [],
-    "state_mutability": "external"
-  },
-  {
     "kind": "enum",
-    "name": "counter::counter::SimpleCounter::Event",
+    "name": "cairo_bootcamp_3::counter::Counter::Event",
     "type": "event",
     "variants": []
   }
-] as const
+]

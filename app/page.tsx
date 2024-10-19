@@ -1,29 +1,39 @@
 "use client";
-import React, { useState } from "react";
+import React, { useEffect, useState } from "react";
 import { constants, Contract, RpcProvider } from "starknet";
 import {
   connect,
   disconnect,
   TBAStarknetWindowObject,
-} from "tokenbound-connectkit";
-import { ABI } from "./utils/abi";
+} from "tokenbound-connectorkit-v3";
+import { CounterABi } from "./utils/abi";
+
+
+const contractAddress = "0x45f8e8b3d6ecf220d78fdc13a523ae8ecaa90581ee68baa958d8ba3181841e9";
+const provider = new RpcProvider({
+  nodeUrl: "https://starknet-sepolia.public.blastapi.io/rpc/v0_7",
+})
+
+
 
 export default function page() {
   const [connection, setConnection] = useState<
-    TBAStarknetWindowObject | null | undefined
+    null | undefined
   >(null);
 
+  const [address, setAddress] = useState<string>("");
   const [account, setAccount] = useState();
-  const [address, setAddress] = useState("");
-  const [retrievedValue, setRetrievedValue] = useState("");
+  const counterContract = new Contract(CounterABi, contractAddress, provider);
+  const [count, setCount] = useState<number>(0)
 
-  const contractAddress = "0x077e0925380d1529772ee99caefa8cd7a7017a823ec3db7c003e56ad2e85e300";
+
+
 
   const connectFn = async () => {
     try {
       const { wallet } = await connect({
         tokenboundOptions: {
-          chainId: constants.NetworkName.SN_MAIN,
+          chainId: constants.NetworkName.SN_SEPOLIA,
         },
       });
       setConnection(wallet);
@@ -42,46 +52,42 @@ export default function page() {
     setConnection(null);
   };
 
-  const increaseCounter = async () => {
-    try {
-      const contract = new Contract(ABI, contractAddress, account).typedv2(ABI);
-      await contract.increment();
-      alert("you successfully increased the counter");
-    } catch (error) {
-      console.log(error);
-    }
-  };
-
-  const decreaseCounter = async () => {
-    try {
-      const contract = new Contract(ABI, contractAddress, account).typedv2(ABI);
-      await contract.decrement();
-      alert("you sucessfully decreased the counter");
-    } catch (error) {
-      console.log(error);
-    }
-  };
 
 
-  const getCounter = async () => {
-    const provider = new RpcProvider({
-      nodeUrl: "https://starknet-mainnet.public.blastapi.io",
-    });
-    try {
-      const contract = new Contract(ABI, contractAddress, provider).typedv2(
-        ABI
-      );
-      const counter = await contract.get_current_count();
-      setRetrievedValue(counter.toString());
-    } catch (error) {
-      console.log(error);
+  if (account) {
+    counterContract.connect(account)
+  }
+
+
+
+
+  const setCounter = async () => {
+    const call = counterContract.populate("set_count", [20])
+    const res = await counterContract.set_count(call.calldata)
+    await provider.waitForTransaction(res?.transaction_hash)
+    const newCount = await counterContract.get_count()
+    setCount(newCount.toString())
+
+  }
+
+
+  useEffect(() => {
+    const getCounter = async () => {
+      const counter = await counterContract.get_count()
+      setCount(counter.toString())
+
     }
-  };
+    getCounter()
+  }, [])
 
   return (
-    <div className="flex flex-col items-center justify-center h-[100vh] space-y-5">
+    <div className="flex flex-col items-center justify-center h-[100vh] ">
+
+
+<p className="py-2 text-[25px] font-bold"> Counter dApp &</p>
+
       {!connection ? (
-        <button className="button px-5 py-3 bg-[#0C0C4F]" onClick={connectFn}>
+        <button className="button cursor-pointer px-5 pt-5 py-3 text-white bg-[#0C0C4F]" onClick={connectFn}>
           Connect Wallet
         </button>
       ) : (
@@ -97,36 +103,20 @@ export default function page() {
           </p>
         )}
 
-        <div className="card py-5">
-          <p className="py-5">Increase/Decrease Counter &rarr;</p>
+        <div className=" py-5">
 
-          <div className="cardForm">
-            <input
-              type="submit"
-              value="Increase"
-              className="px-5 py-3 bg-[#0C0C4F] cursor-pointer"
-              onClick={increaseCounter}
-            />
-            <input
-              type="submit"
-              value="Decrease"
-              className="bg-red-500 px-5 py-3 cursor-pointer"
-              onClick={decreaseCounter}
-            />
+          <div className=" py-5 flex items-center justify-center">
+            <p className="text-[20px]">Count: <span className="font-bold">{count}</span></p>
+          </div>
+
+          <div className="">
+            <button
+              className="px-5  py-3 bg-[#0C0C4F] text-white cursor-pointer"
+              onClick={setCounter}
+            >Set Count</button>
           </div>
 
           <hr />
-          <p className="pt-10 text-center">Get Counter &rarr;</p>
-
-          <div className="cardForm pt-5 flex items-center justify-center">
-            <input
-              type="submit"
-              className="button cursor-pointer px-5 py-3 bg-[#0C0C4F] rounded-lg"
-              value="Get Counter"
-              onClick={getCounter}
-            />
-            <p>{retrievedValue}</p>
-          </div>
         </div>
       </header>
     </div>
